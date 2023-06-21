@@ -562,7 +562,7 @@ void drawProjectileWindow(ProjectileList list,std::uint16_t Count) {
 void debug() {
 	ImGui::SetNextWindowSize({ 400, 400 });
 	ImGui::Begin("Unit List");
-	static const char* items[] = { "Unit List 1", "Unit List 2", "Unit List 3", "BombList"/*, "RocketList" */ };
+	static const char* items[] = { "Unit List 1", "Unit List 2", "Unit List 3"/*, "BombList", "RocketList" */ };
 	static int currentItem = 0;
 
 	UnitList list{};
@@ -591,11 +591,11 @@ void debug() {
 		Count = *reinterpret_cast<std::uint16_t*>(memory::address::cGame + memory::offset::UnitCount_3);
 		drawUnitWindow(list, Count, localplayer);
 		break;
-	case 3:
-		plist = *reinterpret_cast<ProjectileList*>(memory::address::modulebase + memory::offset::BombArray);
-		Count = *reinterpret_cast<std::uint16_t*>(memory::address::modulebase + memory::offset::BombArray + 0x10);
-		drawProjectileWindow(plist, Count);
-		break;
+	//case 3:
+	//	plist = *reinterpret_cast<ProjectileList*>(memory::address::modulebase + memory::offset::BombArray);
+	//	Count = *reinterpret_cast<std::uint16_t*>(memory::address::modulebase + memory::offset::BombArray + 0x10);
+	//	drawProjectileWindow(plist, Count);
+	//	break;
 	//case 4:
 	//	plist = *reinterpret_cast<ProjectileList*>(memory::address::modulebase + memory::offset::RocketArray);
 	//	Count = *reinterpret_cast<std::uint16_t*>(memory::address::modulebase + memory::offset::RocketArray + 0x10);
