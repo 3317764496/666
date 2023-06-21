@@ -10,14 +10,13 @@ void Misc() {
 
 void HudChanger()
 {
-	UnitList list = *(UnitList*)(memory::address::cGame + memory::offset::UnitList_3);
-	GameOptics* addr = *(GameOptics**)(memory::address::cGame + memory::offset::GameOptics);
+	UnitList list = *reinterpret_cast<UnitList*>(memory::address::cGame + memory::offset::UnitList_3);
+	GameOptics* addr = *reinterpret_cast<GameOptics**>(memory::address::cGame + memory::offset::GameOptics);
 	if (!list.unitList)
 		return;
-	HUD* HudInfo = *(HUD**)(memory::address::modulebase + memory::offset::HudInfo);
+	HUD* HudInfo = *reinterpret_cast<HUD**>(memory::address::modulebase + memory::offset::HudInfo);
 
 	HudInfo->penetration_crosshair = true;
-	HudInfo->air_to_air_indicator = true;
 	HudInfo->draw_plane_aim_indicator = true;
 	if (cfg::change_hud)
 	{
@@ -46,26 +45,26 @@ void HudChanger()
 
 void ZoomMod()
 {
-	UnitList list = *(UnitList*)(memory::address::cGame + memory::offset::UnitList_3);
+	UnitList list = *reinterpret_cast<UnitList*>(memory::address::cGame + memory::offset::UnitList_3);
 	if (!list.unitList)
 		return;
-	Player* localplayer = *(Player**)(memory::address::modulebase + memory::offset::LocalPlayer);
+	Player* localplayer = *reinterpret_cast<Player**>(memory::address::modulebase + memory::offset::LocalPlayer);
 	if (localplayer->IsinHangar())
 		return;
-	if (localplayer->ControlledUnit == NULL or localplayer->ControlledUnit->UnitInfo == NULL)
+	if (localplayer->OwnedUnit == NULL or localplayer->OwnedUnit->UnitInfo == NULL)
 		return;
 
 	if (cfg::zoom_mod)
 	{
-		localplayer->ControlledUnit->UnitInfo->ZoomMulti = cfg::zoom_mult;
-		localplayer->ControlledUnit->UnitInfo->AlternateMulti = cfg::alt_mult;
-		localplayer->ControlledUnit->UnitInfo->ShadowMulti = cfg::shadow_mult;
+		localplayer->OwnedUnit->UnitInfo->ZoomMulti = cfg::zoom_mult;
+		localplayer->OwnedUnit->UnitInfo->AlternateMulti = cfg::alt_mult;
+		localplayer->OwnedUnit->UnitInfo->ShadowMulti = cfg::shadow_mult;
 	}
 	else
 	{
-		localplayer->ControlledUnit->UnitInfo->ZoomMulti = cfg::DEFAULT_ZOOM_MULT;
-		localplayer->ControlledUnit->UnitInfo->AlternateMulti = cfg::DEFAULT_ALT_MULT;
-		localplayer->ControlledUnit->UnitInfo->ShadowMulti = cfg::DEFAULT_SHADOW_MULT;
+		localplayer->OwnedUnit->UnitInfo->ZoomMulti = cfg::DEFAULT_ZOOM_MULT;
+		localplayer->OwnedUnit->UnitInfo->AlternateMulti = cfg::DEFAULT_ALT_MULT;
+		localplayer->OwnedUnit->UnitInfo->ShadowMulti = cfg::DEFAULT_SHADOW_MULT;
 	}
 	return;
 }

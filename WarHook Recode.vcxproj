@@ -25,6 +25,7 @@
     <ClCompile Include="src\Cheat\Funcs\Misc\Misc.cpp" />
     <ClCompile Include="src\Cheat\main.cpp" />
     <ClCompile Include="src\Cheat\Menu\Menu.cpp" />
+    <ClCompile Include="src\Cheat\SDK\Weapons.cpp" />
     <ClCompile Include="src\Cheat\Utils\Font.cpp" />
     <ClCompile Include="src\Cheat\Utils\Memory.cpp" />
     <ClCompile Include="src\Cheat\Utils\SigScanner.cpp" />

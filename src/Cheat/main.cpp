@@ -129,25 +129,27 @@ void InitDxStuff() {
 
 HRESULT __stdcall hookD3D11ResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
 {
-	if (mainRenderTargetView) {
-		pContext->OMSetRenderTargets(0, 0, 0);
+	if (mainRenderTargetView)
+	{
+		pContext->OMSetRenderTargets(0, nullptr, nullptr);
 		mainRenderTargetView->Release();
+		mainRenderTargetView = nullptr;
 	}
 
 	HRESULT hr = phookD3D11ResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 
 	ID3D11Texture2D* pBuffer;
-	pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBuffer);
-
-	pDevice->CreateRenderTargetView(pBuffer, NULL, &mainRenderTargetView);
-
+	pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBuffer));
+	pDevice->CreateRenderTargetView(pBuffer, nullptr, &mainRenderTargetView);
+	
 	pBuffer->Release();
-
-	pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
+	pBuffer = nullptr;
+	
+	pContext->OMSetRenderTargets(1, &mainRenderTargetView, nullptr);
 
 	D3D11_VIEWPORT vp;
-	vp.Width = Width;
-	vp.Height = Height;
+	vp.Width = static_cast<float>(Width);
+	vp.Height = static_cast<float>(Height);
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
@@ -156,11 +158,11 @@ HRESULT __stdcall hookD3D11ResizeBuffers(IDXGISwapChain* pSwapChain, UINT Buffer
 	pContext->RSSetViewports(1, &vp);
 
 	ImGuiIO& io = ImGui::GetIO();
-	io.DisplaySize = ImVec2((float)Width, (float)Height);
+	io.DisplaySize = ImVec2(static_cast<float>(Width), static_cast<float>(Height));
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 	ImGui::Render();
 
-	memory::scrsize = { (float)Width, (float)Height };
+	memory::scrsize = { static_cast<float>(Width), static_cast<float>(Height) };
 
 	return hr;
 }
@@ -188,28 +190,6 @@ void __stdcall hookD3D11DrawIndexed(ID3D11DeviceContext* pContext, UINT IndexCou
 	if (vscBuffer != NULL)
 		vscBuffer->GetDesc(&vscdesc);
 	if (vscBuffer != NULL) { vscBuffer->Release(); vscBuffer = NULL; }
-
-	/*if (GetAsyncKeyState(VK_NUMPAD1) & 1)
-	{
-		nstride += 1;
-		printf("Stride: %d \n", nstride);
-	}
-	if (GetAsyncKeyState(VK_NUMPAD4) & 1)
-	{
-		nstride -= 1;
-		printf("Stride: %d \n", nstride);
-	}
-	if (GetAsyncKeyState(VK_NUMPAD2) & 1)
-	{
-		count += 1;
-		printf("Count: %d \n", count);
-	}
-	if (GetAsyncKeyState(VK_NUMPAD5) & 1)
-	{
-		count -= 1;
-		printf("Count: %d \n", count);
-	}
-	*/
 
 	if (cfg::remove_smokes)
 	{
@@ -333,10 +313,10 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 #ifdef _DEBUG
 	menu::agree = true;
 #endif // _DEBUG
+	menu::agree = true;
 	if (!menu::agree)
 		menu::showWarningwindow();
-	
-	if (menu::agree)
+	else
 	{
 		if (menu::open)
 		{

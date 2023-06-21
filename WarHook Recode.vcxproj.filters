@@ -100,6 +100,9 @@
     <ClCompile Include="src\Cheat\Funcs\Misc\Misc.cpp">
       <Filter>Cheat\Funcs</Filter>
     </ClCompile>
+    <ClCompile Include="src\Cheat\SDK\Weapons.cpp">
+      <Filter>Cheat\SDK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Extenal\imgui\imconfig.h">

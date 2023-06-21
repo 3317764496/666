@@ -54,7 +54,7 @@ void menu::SetupImGuiStyle()
 	colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
 	colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.00f);
 	colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.02f);
-	colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+	colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.00f);
 	colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.00f);
 	colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 0.00f);
 	colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
@@ -134,7 +134,7 @@ void menu::showMenu() {
 		ImGui::SetCursorPosX(5.f);
 		ImGui::Checkbox("Show planes", &cfg::show_planes);
 		ImGui::SetCursorPosX(5.f);
-		ImGui::Checkbox("Show bombs", &cfg::show_bombs);
+		/*ImGui::Checkbox("Show bombs", &cfg::show_bombs);
 		if (cfg::show_bombs) {
 			ImGui::SameLine();
 			ImGui::RadioButton("Icon##0", &cfg::Bout_type, 0);
@@ -149,7 +149,7 @@ void menu::showMenu() {
 			ImGui::SameLine();
 			ImGui::RadioButton("Text##1", &cfg::Mout_type, 1);
 		}
-		ImGui::SetCursorPosX(5.f);
+		ImGui::SetCursorPosX(5.f);*/
 		ImGui::Checkbox("Remove smokes", &cfg::remove_smokes);
 		ImGui::SetCursorPosX(5.f);
 		ImGui::Checkbox("Show offscreen arrows", &cfg::show_offscreen);

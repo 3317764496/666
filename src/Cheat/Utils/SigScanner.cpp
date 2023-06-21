@@ -7,8 +7,8 @@ std::vector<sig> sigs::signatures = {
 	sig(sigs::ScreenWidth,0x2),
 	sig(sigs::IsScoping,0x3),
 	sig(sigs::ViewMatrix,0x3),
-	sig(sigs::BombArray,0x3),
-	sig(sigs::RocketArray,0x3) };
+	/*sig(sigs::BombArray,0x3),
+	sig(sigs::RocketArray,0x3) */};
 
 std::uint8_t* Scan(const char* signature) noexcept
 {

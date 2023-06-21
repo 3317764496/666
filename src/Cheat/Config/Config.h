@@ -26,6 +26,6 @@ namespace cfg {
 	extern bool block_input;
 
 	constexpr float DEFAULT_ZOOM_MULT = 5.f;
-	constexpr float DEFAULT_ALT_MULT = 15.f;
+	constexpr float DEFAULT_ALT_MULT = 10.f;
 	constexpr float DEFAULT_SHADOW_MULT = 20.f;
 }

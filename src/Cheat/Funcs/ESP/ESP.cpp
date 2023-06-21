@@ -12,26 +12,14 @@ bool WorldToScreen(const Vector3& in, Vector3& out)
 	const uintptr_t mat_addr = memory::address::modulebase + memory::offset::mat_addr;
 	const ViewMatrix& mat = *reinterpret_cast<ViewMatrix*>(mat_addr);
 
-	float width = mat[0][3] * in.x + mat[1][3] * in.y + mat[2][3] * in.z + mat[3][3];
-
-	bool visible = width >= 0.1f;
-	if (!visible)
+	const float width = mat[0][3] * in.x + mat[1][3] * in.y + mat[2][3] * in.z + mat[3][3];
+	if (width < 0.1f)
 		return false;
-	else
-		width = 1.0f / width;
 
-	float x = in.x * mat[0][0] + in.y * mat[1][0] + in.z * mat[2][0] + mat[3][0];
-	float y = in.x * mat[0][1] + in.y * mat[1][1] + in.z * mat[2][1] + mat[3][1];
-	float z = in.x * mat[0][2] + in.y * mat[1][2] + in.z * mat[2][2] + mat[3][2];
-
-	float nx = x * width;
-	float ny = y * width;
-	float nz = z * width;
-
-
-	out.x = (memory::scrsize.x / 2 * nx) + (nx + memory::scrsize.x / 2);
-	out.y = -(memory::scrsize.y / 2 * ny) + (ny + memory::scrsize.y / 2);
-	out.z = nz;
+	const float inv_width = 1.0f / width;
+	out.x = (memory::scrsize.x / 2) * (in.x * mat[0][0] + in.y * mat[1][0] + in.z * mat[2][0] + mat[3][0]) * inv_width + (memory::scrsize.x / 2);
+	out.y = -(memory::scrsize.y / 2) * (in.x * mat[0][1] + in.y * mat[1][1] + in.z * mat[2][1] + mat[3][1]) * inv_width + (memory::scrsize.y / 2);
+	out.z = (in.x * mat[0][2] + in.y * mat[1][2] + in.z * mat[2][2] + mat[3][2]) * inv_width;
 
 	return true;
 }
@@ -200,7 +188,7 @@ void DrawTextOnScreen(const ImVec2& position, const ImVec2& size, const std::str
 void DrawReloadBar(const ImVec2& position, int count, const ImVec2& size)// ALOT OF MAGIC NUMBERS HERE, I KNOW, BUT IT WORKS
 {
 	constexpr float stat = (10.f / 16);
-	float progress = ((stat * count) * 0.1f);
+	float progress = stat * count * 0.1f;
 
 	auto draw = ImGui::GetBackgroundDrawList();
 	ImVec2 startPos{ position.x - (size.x * 0.5f) - 5, position.y + 10 + (size.y * 0.5f) + 5 };
@@ -239,7 +227,6 @@ bool IsUnitValid(Unit* unit, Unit* local)
 //	return false;
 //}
 
-
 void ESP()
 {
 	if (!cfg::esp_status)
@@ -253,15 +240,15 @@ void ESP()
 
 	if (localplayer->IsinHangar())
 	{
-		if (localplayer->ControlledUnit == NULL or localplayer->ControlledUnit->UnitInfo == NULL)
+		if (localplayer->OwnedUnit == NULL or localplayer->OwnedUnit->UnitInfo == NULL)
 			return;
-		auto position = localplayer->ControlledUnit->Position;
-		const auto& rotation = localplayer->ControlledUnit->RotationMatrix;
+		auto position = localplayer->OwnedUnit->Position;
+		const auto& rotation = localplayer->OwnedUnit->RotationMatrix;
 
 		auto draw = ImGui::GetBackgroundDrawList();
 
-		const Vector3& bbmin = localplayer->ControlledUnit->BBMin;
-		const Vector3& bbmax = localplayer->ControlledUnit->BBMax;
+		const Vector3& bbmin = localplayer->OwnedUnit->BBMin;
+		const Vector3& bbmax = localplayer->OwnedUnit->BBMax;
 
 		DrawBox(rotation, bbmin, bbmax, position);
 
@@ -275,7 +262,7 @@ void ESP()
 	for (auto i = 0; i < unitCount; ++i)
 	{
 		Unit* unit = list.unitList->units[i];
-		Unit* local = localplayer->ControlledUnit;
+		Unit* local = localplayer->OwnedUnit;
 		Player* player = unit->PlayerInfo;
 
 		if (!local)
@@ -391,7 +378,7 @@ void ESP()
 		}
 	}
 
-	if (cfg::show_bombs)
+	/*if (cfg::show_bombs)
 	{
 		ProjectileList bomblist{};
 		std::uint16_t bombCount{};
@@ -455,7 +442,7 @@ void ESP()
 				continue;
 			auto draw = ImGui::GetBackgroundDrawList();
 			std::ostringstream oss;
-			oss << std::fixed << std::setprecision(1) << localplayer->ControlledUnit->Position.Distance(unit->Position);
+			oss << std::fixed << std::setprecision(1) << localplayer->OwnedUnit->Position.Distance(unit->Position);
 			std::string dist_str = oss.str();
 			const char* text2 = dist_str.c_str();
 			const auto size2 = ImGui::CalcTextSize(text2);
@@ -490,7 +477,7 @@ void ESP()
 				}
 			}
 		}
-	}
+	}*/
 }
 
 
@@ -500,28 +487,39 @@ void drawUnitWindow(UnitList list, std::uint16_t Count, Player* localplayer) {
 		const auto unit = list.unitList->units[i];
 		if (!unit)
 			continue;
-		auto local = localplayer->ControlledUnit;
+		auto local = localplayer->OwnedUnit;
 		if (!local)
 			continue;
 		if (local->Position.x == 0)
 			continue;
 		const auto id = reinterpret_cast<std::intptr_t>(unit) + i;
 		if (ImGui::TreeNode(reinterpret_cast<void*>(id), "%s Unit: %s", unit->PlayerInfo == nullptr ? "Bot" : "Player", unit->UnitInfo->unitName)) {
-			ImGui::Text("Bot: %s", unit->PlayerInfo == nullptr ? "true" : "false");
-			ImGui::Text("Is plane: %s", unit->UnitInfo->isPlane() ? "true" : "false");
-			ImGui::Text("Is dummy: %s", unit->UnitInfo->isDummy() ? "true" : "false");
-			ImGui::Text("Position: %f %f %f", unit->Position.x, unit->Position.y, unit->Position.z);
-			ImGui::Text("Distance: %f", unit->Position.Distance(localplayer->ControlledUnit->Position));
-			ImGui::Text("Invul? %s", unit->Invulnerable ? "true" : "false");
-			ImGui::Text("Address: %p", unit);
-			if (ImGui::IsItemClicked()) {
-				std::stringstream stream{};
-				stream << std::hex << reinterpret_cast<std::uintptr_t>(unit);
-				ImGui::SetClipboardText(stream.str().c_str());
+			if (ImGui::TreeNode(reinterpret_cast<void*>(id + 1), "Info")) {
+				ImGui::Text("Bot: %s", unit->PlayerInfo == nullptr ? "true" : "false");
+					ImGui::Text("Is plane: %s", unit->UnitInfo->isPlane() ? "true" : "false");
+					ImGui::Text("Is dummy: %s", unit->UnitInfo->isDummy() ? "true" : "false");
+					ImGui::Text("Position: %f %f %f", unit->Position.x, unit->Position.y, unit->Position.z);
+					ImGui::Text("Distance: %f", unit->Position.Distance(localplayer->OwnedUnit->Position));
+					ImGui::Text("Invul? %s", unit->Invulnerable ? "true" : "false");
+					ImGui::Text("Unitstate: %d", unit->UnitState);
+					ImGui::Text("Address: %p", unit);
+					if (ImGui::IsItemClicked()) {
+						std::stringstream stream{};
+							stream << std::hex << reinterpret_cast<std::uintptr_t>(unit);
+							ImGui::SetClipboardText(stream.str().c_str());
+					}
+				ImGui::TreePop();
 			}
-			
-			ImGui::Text("Unitstate: %d", unit->UnitState);
-			if (ImGui::TreeNode(reinterpret_cast<void*>(id + 1), "Unit info")) {
+			//if (ImGui::TreeNode(reinterpret_cast<void*>(id + 2), "Weapon Info") && !unit->UnitInfo->isPlane()) {
+			//	Ammo* curAmmo = reinterpret_cast<Ammo*>(*reinterpret_cast<uintptr_t**>(unit->Weapons->ControllableWeapons->WeaponPtr->WeaponInfo->GetAmmo(unit->Weapons->ControllableWeapons->WeaponPtr->ActiveSlot)));
+			//	ImGui::Text("Weapon: %s", unit->Weapons->ControllableWeapons->WeaponPtr->WeaponInfo->WeaponName);
+			//	ImGui::Text("Rotation: X: %f Y: %f", unit->Weapons->ControllableWeapons->Rotation.x, unit->Weapons->ControllableWeapons->Rotation.y);
+			//	ImGui::Text("Current ammo: %s", curAmmo->Name);
+			//	ImGui::Text("Current slot: %d", unit->Weapons->ControllableWeapons->WeaponPtr->ActiveSlot);
+			//	ImGui::Text("Next slot: %d", unit->Weapons->ControllableWeapons->WeaponPtr->SelectedSlot);
+			//	ImGui::TreePop();
+			//}
+			if (ImGui::TreeNode(reinterpret_cast<void*>(id + 3), "Unit info")) {
 				ImGui::Text("Unit name: %s", unit->UnitInfo->unitName);
 				ImGui::Text("Model name: %s", unit->UnitInfo->modelName);
 				ImGui::Text("Unit type: %s", unit->UnitInfo->unitType);
@@ -564,7 +562,7 @@ void drawProjectileWindow(ProjectileList list,std::uint16_t Count) {
 void debug() {
 	ImGui::SetNextWindowSize({ 400, 400 });
 	ImGui::Begin("Unit List");
-	static const char* items[] = { "Unit List 1", "Unit List 2", "Unit List 3", "BombList", "RocketList" };
+	static const char* items[] = { "Unit List 1", "Unit List 2", "Unit List 3", "BombList"/*, "RocketList" */ };
 	static int currentItem = 0;
 
 	UnitList list{};
@@ -598,11 +596,11 @@ void debug() {
 		Count = *reinterpret_cast<std::uint16_t*>(memory::address::modulebase + memory::offset::BombArray + 0x10);
 		drawProjectileWindow(plist, Count);
 		break;
-	case 4:
-		plist = *reinterpret_cast<ProjectileList*>(memory::address::modulebase + memory::offset::RocketArray);
-		Count = *reinterpret_cast<std::uint16_t*>(memory::address::modulebase + memory::offset::RocketArray + 0x10);
-		drawProjectileWindow(plist, Count);
-		break;
+	//case 4:
+	//	plist = *reinterpret_cast<ProjectileList*>(memory::address::modulebase + memory::offset::RocketArray);
+	//	Count = *reinterpret_cast<std::uint16_t*>(memory::address::modulebase + memory::offset::RocketArray + 0x10);
+	//	drawProjectileWindow(plist, Count);
+	//	break;
 	default:
 		break;
 	}
