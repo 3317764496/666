@@ -18,14 +18,14 @@ namespace memory {
 		extern uintptr_t BombArray;
 		extern uintptr_t RocketArray;
 		
-		constexpr uintptr_t UnitList_1 = 0x320;
-		constexpr uintptr_t UnitList_2 = 0x338;
-		constexpr uintptr_t UnitList_3 = 0x350;
-		constexpr uintptr_t UnitCount_1 = 0x330;
-		constexpr uintptr_t UnitCount_2 = 0x348;
-		constexpr uintptr_t UnitCount_3 = 0x360;
-		constexpr uintptr_t CurrentMap = 0x1C0;
-		constexpr uintptr_t GameOptics = 0x498;
+		constexpr uintptr_t UnitList_1 = 0x330;
+		constexpr uintptr_t UnitList_2 = 0x348;
+		constexpr uintptr_t UnitList_3 = 0x360;
+		constexpr uintptr_t UnitCount_1 = 0x340;
+		constexpr uintptr_t UnitCount_2 = 0x358;
+		constexpr uintptr_t UnitCount_3 = 0x370;
+		constexpr uintptr_t CurrentMap = 0x1D0;
+		constexpr uintptr_t GameOptics = 0x4A8;
 		
 
 	}
